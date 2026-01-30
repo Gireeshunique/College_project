@@ -1,0 +1,11 @@
+flask
+flask-cors
+pypdf
+python-docx
+python-pptx
+reportlab
+transformers
+torch
+gtts
+whisper
+mysql-connector-python
