@@ -31,7 +31,7 @@ This project is designed to act as a virtual teacher, helping students learn by 
 ### 🏗 Project Architecture
 Frontend (React)
 │
-├── PDFViewer
+ ├── PDFViewer
 │   ├── Upload file
 │   ├── Render PDF
 │   └── Extract text → App state
