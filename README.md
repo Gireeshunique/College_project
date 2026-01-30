@@ -1,12 +1,12 @@
 # College_project
 
-📘 AI PDF Voice Reader & Virtual Teacher
+## 📘 AI PDF Voice Reader & Virtual Teacher
 
 An AI-powered web application that allows users to upload PDF / DOCX / PPT files, view them in the browser, and have an AI voice assistant read the document aloud with controls like Start, Pause, Resume, and Stop.
 
 This project is designed to act as a virtual teacher, helping students learn by listening to documents while viewing them simultaneously.
 
-🚀 Features
+### 🚀 Features
 
 📄 Upload PDF / DOCX / PPTX files
 
@@ -28,7 +28,7 @@ This project is designed to act as a virtual teacher, helping students learn by 
 
 🗄 MySQL database for storing document text
 
-🏗 Project Architecture
+### 🏗 Project Architecture
 Frontend (React)
 │
 ├── PDFViewer
@@ -50,8 +50,8 @@ Backend (Flask)
 ├── Database Layer (MySQL)
 └── AI Engine
 
-🧑‍💻 Tech Stack
-Frontend
+### 🧑‍💻 Tech Stack
+##### Frontend
 
 React
 
@@ -61,7 +61,7 @@ Web Speech API (SpeechSynthesis)
 
 CSS
 
-Backend
+###### Backend
 
 Python (Flask)
 
@@ -75,11 +75,11 @@ python-pptx
 
 MySQL Connector
 
-Database
+##### Database
 
 MySQL
 
-📂 Project Structure
+### 📂 Project Structure
 project-root/
 │
 ├── backend/
@@ -102,15 +102,15 @@ project-root/
 │
 └── README.md
 
-🛠 Setup Instructions
-1️⃣ Backend Setup
+### 🛠 Setup Instructions
+##### 1️⃣ Backend Setup
 cd backend
 python -m venv venv
 venv\Scripts\activate   # Windows
 pip install -r requirements.txt
 
 
-Create MySQL database:
+##### Create MySQL database:
 
 CREATE DATABASE ai_teacher;
 
@@ -130,7 +130,7 @@ Backend runs at:
 
 http://127.0.0.1:5000
 
-2️⃣ Frontend Setup
+##### 2️⃣ Frontend Setup
 cd frontend
 npm install
 npm start
@@ -140,13 +140,13 @@ Frontend runs at:
 
 http://localhost:3000
 
-🔌 API Endpoints
+#### 🔌 API Endpoints
 Method	Endpoint	Description
 POST	/upload	Upload PDF / DOCX / PPT
 GET	/pdf/<filename>	Serve PDF file
 GET	/pdf_text_pages	Get extracted text
 GET	/explain_pdf	AI summary (optional)
-🎯 How It Works
+##### 🎯 How It Works
 
 User uploads a document
 
@@ -162,7 +162,7 @@ AI reads the document aloud
 
 User controls reading using buttons
 
-✅ Current Capabilities
+#### ✅ Current Capabilities
 
 ✔ AI reads full PDF content
 
@@ -174,7 +174,7 @@ User controls reading using buttons
 
 ✔ Stable backend
 
-🔮 Future Enhancements
+### 🔮 Future Enhancements
 
 🟨 Word highlighting inside PDF
 
@@ -188,7 +188,7 @@ User controls reading using buttons
 
 📱 Mobile-friendly UI
 
-👨‍🎓 Use Cases
+### 👨‍🎓 Use Cases
 
 Students and self-learners
 
@@ -200,11 +200,11 @@ Digital reading assistants
 
 AI-based teaching tools
 
-🧾 License
+### 🧾 License
 
 This project is for educational and research purposes.
 
-🙌 Author
+### 🙌 Author
 
 Gireesh Boggala
 AI Virtual Teacher Project
