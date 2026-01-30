@@ -80,27 +80,27 @@ MySQL Connector
 MySQL
 
 ### 📂 Project Structure
-project-root/
+Frontend (React)
 │
-├── backend/
-│   ├── app.py
-│   ├── ai_engine.py
-│   ├── database.py
-│   ├── pdf_utils.py
-│   ├── file_converter.py
-│   ├── uploads/
-│   └── static/audio/
+├── PDFViewer
+│   ├── Upload file
+│   ├── Render PDF
+│   └── Extract text → App state
 │
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── PDFViewer.jsx
-│   │   │   └── AIVoiceAssistant.jsx
-│   │   ├── App.jsx
-│   │   └── index.js
-│   └── public/
+├── AIVoiceAssistant
+│   └── Reads PDF text using AI voice
 │
-└── README.md
+└── App.jsx (Shared State)
+    └── pdfText
+        ↓
+Backend (Flask)
+│
+├── Upload API
+├── File Converter (DOCX / PPTX → PDF)
+├── PDF Text Extractor
+├── Database Layer (MySQL)
+└── AI Engine
+
 
 ### 🛠 Setup Instructions
 ##### 1️⃣ Backend Setup
