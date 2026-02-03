@@ -74,7 +74,7 @@ def upload_file():
     return jsonify({
         "message": "File uploaded successfully",
         "filename": os.path.basename(pdf_path),
-        "text": full_text,
+        "pdf_url": f"http://localhost:5000/pdf/{os.path.basename(pdf_path)}",
         "pages": pages
     })
 

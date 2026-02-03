@@ -1,23 +1,20 @@
 import { useRef, useState } from "react";
 import "./AIVoiceAssistant.css";
 
-function AIVoiceAssistant({ pdfText }) {
+function AIVoiceAssistant({ pdfText, setActiveWord }) {
   const [voiceType, setVoiceType] = useState("female");
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
 
   const utteranceRef = useRef(null);
-
-  /* ---------------- WAIT FOR VOICES (CHROME FIX) ---------------- */
+  const currentWordIndexRef = useRef(null);
+ 
+  /* ---------- WAIT FOR VOICES ---------- */
   const waitForVoices = () =>
     new Promise(resolve => {
       let voices = speechSynthesis.getVoices();
       if (voices.length) return resolve(voices);
-
-      speechSynthesis.onvoiceschanged = () => {
-        voices = speechSynthesis.getVoices();
-        resolve(voices);
-      };
+      speechSynthesis.onvoiceschanged = () => resolve(speechSynthesis.getVoices());
     });
 
   const getVoice = (voices) =>
@@ -27,89 +24,94 @@ function AIVoiceAssistant({ pdfText }) {
         : v.name.toLowerCase().includes("male")
     ) || voices[0];
 
-  /* ---------------- TEXT CHUNKING ---------------- */
-  const chunkText = (text, size = 1200) => {
-    const chunks = [];
-    let i = 0;
-    while (i < text.length) {
-      chunks.push(text.slice(i, i + size));
-      i += size;
-    }
-    return chunks;
-  };
-
-  /* ▶ START (CORRECT, SINGLE VERSION) */
-  const startReading = async () => {
-    if (!pdfText || pdfText.trim().length === 0) {
-      return; // silently ignore if clicked too early
-    }
-
-    speechSynthesis.cancel();
-    setIsSpeaking(true);
-    setIsPaused(false);
+  /* ---------- SPEAK FROM WORD ---------- */
+  const speakFromWord = async (startIndex) => {
+    if (!pdfText) return;
 
     const voices = await waitForVoices();
-    const chunks = chunkText(pdfText);
-    let chunkIndex = 0;
+    const words = pdfText.split(" ");
+    const remainingText = words.slice(startIndex).join(" ");
 
-    const speakChunk = () => {
-      if (chunkIndex >= chunks.length) {
-        setIsSpeaking(false);
-        return;
+    const utterance = new SpeechSynthesisUtterance(remainingText);
+    utterance.voice = getVoice(voices);
+
+    let localIndex = startIndex;
+
+    utterance.onboundary = (e) => {
+      if (e.name === "word") {
+        setActiveWord(localIndex);
+        currentWordIndexRef.current = localIndex;
+        localIndex++;
       }
-
-      const utterance = new SpeechSynthesisUtterance(chunks[chunkIndex]);
-      utterance.voice = getVoice(voices);
-
-      utterance.onend = () => {
-        chunkIndex++;
-        speakChunk();
-      };
-
-      utteranceRef.current = utterance;
-      speechSynthesis.speak(utterance);
     };
 
-    speakChunk();
+    utterance.onend = () => {
+      setIsSpeaking(false);
+      setIsPaused(false);
+      setActiveWord(-1);
+    };
+
+    utteranceRef.current = utterance;
+    speechSynthesis.speak(utterance);
+  };
+
+  /* ▶ START */
+  const startReading = () => {
+    if (!pdfText) return;
+
+    speechSynthesis.cancel();
+    currentWordIndexRef.current = 0;
+    setIsSpeaking(true);
+    setIsPaused(false);
+    setActiveWord(-1);
+
+    speakFromWord(0);
   };
 
   /* ⏸ PAUSE */
   const pauseReading = () => {
-    if (speechSynthesis.speaking && !speechSynthesis.paused) {
-      speechSynthesis.pause();
-      setIsPaused(true);
-    }
+    if (!isSpeaking) return;
+
+    speechSynthesis.cancel(); // stop current utterance
+    setIsSpeaking(false);
+    setIsPaused(true);
   };
 
-  /* ▶ RESUME */
+  /* ▶ RESUME (FIXED) */
   const resumeReading = () => {
-    if (speechSynthesis.paused) {
-      speechSynthesis.resume();
-      setIsPaused(false);
-    }
+    if (!isPaused) return;
+
+    setIsPaused(false);
+    setIsSpeaking(true);
+
+    speakFromWord(currentWordIndexRef.current);
   };
 
-  /* ⏹ STOP */
+  /* ⏹ STOP (RESET) */
   const stopReading = () => {
     speechSynthesis.cancel();
     setIsSpeaking(false);
     setIsPaused(false);
+    setActiveWord(-1);
+    currentWordIndexRef.current = 0;
   };
 
   return (
     <div className="ai-panel">
 
-      {/* CONTROLS */}
-      <select onChange={e => setVoiceType(e.target.value)}>
+      <select
+        onChange={e => setVoiceType(e.target.value)}
+        disabled={isSpeaking}
+      >
         <option value="female">Female Voice</option>
         <option value="male">Male Voice</option>
       </select>
 
-      <button onClick={startReading}>
+      <button onClick={startReading} disabled={!pdfText || isSpeaking}>
         ▶ Start
       </button>
 
-      <button onClick={pauseReading} disabled={!isSpeaking || isPaused}>
+      <button onClick={pauseReading} disabled={!isSpeaking}>
         ⏸ Pause
       </button>
 
@@ -117,11 +119,10 @@ function AIVoiceAssistant({ pdfText }) {
         ▶ Resume
       </button>
 
-      <button onClick={stopReading}>
+      <button onClick={stopReading} disabled={!isSpeaking && !isPaused}>
         ⏹ Stop
       </button>
 
-      {/* AI AVATAR */}
       <div className={`ai-icon-wrapper ${isSpeaking ? "ai-speaking" : ""}`}>
         <div className="ai-icon">
           <img

@@ -1,28 +1,29 @@
-import { useRef, useState } from "react";
-
+import { useState } from "react";
 import PDFViewer from "./components/PDFViewer";
 import AIVoiceAssistant from "./components/AIVoiceAssistant";
 
 function App() {
-  const textLayerRef = useRef(null);
   const [pdfText, setPdfText] = useState("");
+  const [pdfUrl, setPdfUrl] = useState(null);
+  const [activeWord, setActiveWord] = useState(-1);
+  const [words, setWords] = useState([]);
 
   return (
-    <div className="layout">
-
-      {/* PDF Viewer */}
+    <>
       <PDFViewer
-        setPdfText={setPdfText}     // 🔥 MUST be used inside PDFViewer
-        textLayerRef={textLayerRef}
+        pdfUrl={pdfUrl}
+        setPdfUrl={setPdfUrl}
+        setPdfText={setPdfText}
+        words={words}
+        setWords={setWords}
+        activeWord={activeWord}
       />
 
-      {/* AI Voice Assistant */}
       <AIVoiceAssistant
-        pdfText={pdfText}          // 🔥 This is what AI reads
-        textLayerRef={textLayerRef}
+        pdfText={pdfText}
+        setActiveWord={setActiveWord}
       />
-
-    </div>
+    </>
   );
 }
 

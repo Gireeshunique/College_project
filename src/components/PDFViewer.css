@@ -1,5 +1,5 @@
 /* ===============================
-   GLOBAL BACKGROUND
+   GLOBAL
 ================================ */
 body {
   margin: 0;
@@ -9,149 +9,147 @@ body {
 }
 
 /* ===============================
-   APP WRAPPER
+   MAIN PDF CONTAINER
+   (SPACE RESERVED FOR AI PANEL)
 ================================ */
-.pdf-app {
+.pdf-container {
   max-width: 1200px;
-  margin: 20px auto;
-  padding: 16px;
+  margin: 24px auto;
+  margin-right: 320px; /* space for fixed AI panel */
+  padding: 20px;
+
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
 }
 
 /* ===============================
    HEADER
 ================================ */
-.pdf-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.pdf-container h2 {
+  margin-bottom: 14px;
+  font-size: 22px;
+  font-weight: 600;
+}
 
-  padding: 16px;
-  background: white;
-  border-radius: 14px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+/* ===============================
+   FILE INPUT
+================================ */
+.pdf-container input[type="file"] {
   margin-bottom: 16px;
 }
 
 /* ===============================
-   CONTENT GRID
+   PDF VIEW
 ================================ */
-.pdf-content {
-  display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 16px;
+.pdf-inner {
+  width: 100%;
+  margin-bottom: 20px;
 }
 
-/* ===============================
-   PDF PANEL
-================================ */
-.pdf-panel {
-  background: #f3f4f6;
-  padding: 16px;
-  border-radius: 16px;
-}
-
-/* ===============================
-   PDF FRAME
-================================ */
 .pdf-frame {
   width: 100%;
-  height: 75vh;
+  height: 65vh;
   border: none;
-  border-radius: 12px;
-  background: white;
-  box-shadow: 0 10px 28px rgba(0,0,0,0.12);
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.12);
 }
 
 /* ===============================
-   PLACEHOLDER
+   PDF PLACEHOLDER
 ================================ */
 .pdf-placeholder {
-  height: 75vh;
+  height: 65vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
-  border-radius: 12px;
+
+  border-radius: 16px;
   border: 2px dashed #d1d5db;
+  background: #ffffff;
   color: #9ca3af;
+  font-size: 16px;
 }
 
 /* ===============================
-   EXTRACTED TEXT PANEL (PROPER DESIGN)
+   EXTRACTED TEXT
 ================================ */
 .pdf-text-outside {
+  width: 100%;
+  max-width: 95%;
+  margin-top: 18px;
+
+  height: 30vh;
+  padding: 22px 26px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
   background: #ffffff;
   border-radius: 16px;
-  padding: 24px 28px;
-
-  height: 50vh;
-  overflow-y: auto;
-  overflow-x: hidden;          
+  border: 1px solid #e5e7eb;
 
   font-size: 16px;
-  line-height: 2;             
+  line-height: 1.85;
   text-align: left;
 
-  box-shadow: 0 8px 24px rgba(0,0,0,0.07);
-
-  /* ✅ WORD WRAPPING FIX */
-  word-break: break-word;
-  overflow-wrap: break-word;
   white-space: normal;
+  word-break: break-word;
+
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.07);
 }
 
 /* ===============================
-   WORD SPAN (FIX)
+   WORD SPANS
 ================================ */
 .pdf-text-outside span {
-  display: inline;            
-  white-space: normal;
-  word-break: break-word;
-  overflow-wrap: break-word;
-
-  padding: 2px 3px;
+  display: inline;
+  padding: 2px 4px;
   border-radius: 5px;
 }
 
-
 /* ===============================
-   ACTIVE WORD
+   ACTIVE WORD HIGHLIGHT
 ================================ */
 .pdf-text-outside .word-highlight {
-  background: linear-gradient(90deg, #fde047, #facc15) !important;
-  color: #111827 !important;
+  background: linear-gradient(90deg, #fde047, #facc15);
+  color: #111827;
   font-weight: 700;
 
   padding: 2px 6px;
   border-radius: 6px;
 
-  box-shadow:
-    0 0 0 2px rgba(250,204,21,0.35);
-
-  transition: background 0.15s ease;
+  box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.35);
 }
 
 /* ===============================
-   LINE HIGHLIGHT
+   SCROLLBAR (CLEAN)
 ================================ */
-.pdf-text-outside .line-highlight {
-  background: rgba(253,224,71,0.25);
-  border-left: 4px solid #facc15;
-  padding-left: 8px;
-  border-radius: 4px;
+.pdf-text-outside::-webkit-scrollbar {
+  width: 8px;
+}
+
+.pdf-text-outside::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 8px;
+}
+
+.pdf-text-outside::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
 }
 
 /* ===============================
    RESPONSIVE
 ================================ */
 @media (max-width: 900px) {
-  .pdf-content {
-    grid-template-columns: 1fr;
+  .pdf-frame {
+    height: 50vh;
   }
-}
 
-
-.word-highlight {
-  background: #fde047;
+  .pdf-text-outside {
+    height: 40vh;
+    padding: 18px;
+  }
 }

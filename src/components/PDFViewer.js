@@ -1,170 +1,138 @@
-import {
-  useState,
-  useEffect,
-  useRef,
-  useCallback
-} from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import "./PDFViewer.css";
 
-function PDFViewer({ setPdfText, words = [], activeWord = -1 }) {
-  const [pdfUrl, setPdfUrl] = useState(null);
-  const [extractedText, setExtractedText] = useState("");
-  const [isPdfReady, setIsPdfReady] = useState(false);
+/* ===============================
+   TEXT CLEANER (PUT HERE)
+================================ */
+const cleanExtractedText = (text) => {
+  return text
+    .replace(/\r?\n+/g, " ")   // remove line breaks
+    .replace(/\s{2,}/g, " ")   // collapse spaces
+    .replace(/-\s+/g, "")      // fix hyphen breaks
+    .replace(/\f/g, " ")       // remove page breaks
+    .trim();
+};
+
+function PDFViewer({
+  pdfUrl,
+  setPdfUrl,
+  setPdfText,
+  words,
+  setWords,
+  activeWord
+}) {
+  const [isReady, setIsReady] = useState(false);
 
   const pdfFrameRef = useRef(null);
   const wordRefs = useRef([]);
   const prevWordRef = useRef(null);
 
-  /* ---------------- PDF UPLOAD ---------------- */
+  /* ========== UPLOAD PDF ========== */
   const uploadPDF = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    setIsPdfReady(false);
-    setExtractedText("");
+    setIsReady(false);
     setPdfText("");
+    setWords([]);
     wordRefs.current = [];
 
     const formData = new FormData();
     formData.append("file", file);
 
-    try {
-      const res = await axios.post(
-        "http://localhost:5000/upload",
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+    const res = await axios.post(
+      "http://localhost:5000/upload",
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
 
-      // ✅ USE pdf_url DIRECTLY (NO MANUAL CONCAT)
-      if (!res.data.pdf_url) {
-        throw new Error("pdf_url missing from backend");
-      }
+    setPdfUrl(res.data.pdf_url);
 
-      setPdfUrl(res.data.pdf_url);
+    const rawText = res.data.pages.map(p => p.text).join(" ");
+    const cleanedText = cleanExtractedText(rawText);
 
-      // optional: backend may or may not send text
-      if (res.data.pages) {
-        const fullText = res.data.pages
-          .map(p => p.text)
-          .join(" ");
+    setPdfText(cleanedText);
+    setWords(cleanedText.split(" "));
 
-        setExtractedText(fullText);
-        setPdfText(fullText);
-        setIsPdfReady(true);
-      } else {
-        // still allow PDF viewing
-        setIsPdfReady(true);
-      }
 
-    } catch (err) {
-      console.error("PDF upload failed:", err);
-      setIsPdfReady(false);
-    }
-  };
+    setIsReady(true);
+  };  
 
-  /* ---------------- WINDOWED WORD RENDERING ---------------- */
-  const WINDOW = 300;
-  const HALF = WINDOW / 2;
+  /* ========== WORD HIGHLIGHT + SCROLL ========== */
+ useEffect(() => {
+  if (!isReady || activeWord < 0 || words.length === 0) return;
 
-  const start = Math.max(activeWord - HALF, 0);
-  const end = start + WINDOW;
+  const el = wordRefs.current[activeWord];
+  if (!el) return;
 
-  const visibleWords = extractedText
-    ? extractedText.split(/\s+/).slice(start, end)
-    : [];
+  prevWordRef.current?.classList.remove("word-highlight");
+  el.classList.add("word-highlight");
+  prevWordRef.current = el;
 
-  /* ---------------- PDF AUTO SCROLL ---------------- */
-  const scrollPdfByProgress = useCallback(() => {
-    if (!pdfFrameRef.current || activeWord < 0) return;
+  el.scrollIntoView({ behavior: "smooth", block: "center" });
 
+  if (pdfFrameRef.current) {
     const iframe = pdfFrameRef.current;
-    const iframeWindow = iframe.contentWindow;
-    const iframeDoc = iframeWindow?.document;
-    if (!iframeDoc) return;
+    const doc = iframe.contentWindow?.document;
+    if (!doc) return;
 
-    const totalHeight = iframeDoc.documentElement.scrollHeight;
-    const viewportHeight = iframeDoc.documentElement.clientHeight;
+    const progress = activeWord / words.length;
+    const maxScroll =
+      doc.documentElement.scrollHeight -
+      doc.documentElement.clientHeight;
 
-    const progress = activeWord / Math.max(words.length, 1);
-
-    iframeWindow.scrollTo({
-      top: progress * (totalHeight - viewportHeight),
+    iframe.contentWindow.scrollTo({
+      top: progress * maxScroll,
       behavior: "smooth"
     });
-  }, [activeWord, words.length]);
+  }
+}, [activeWord, isReady, words.length]);
 
-  /* ---------------- WORD HIGHLIGHT + SCROLL ---------------- */
-  useEffect(() => {
-    if (!isPdfReady || activeWord < 0) return;
-
-    const currentEl = wordRefs.current[activeWord];
-    if (!currentEl) return;
-
-    prevWordRef.current?.classList.remove("word-highlight");
-    currentEl.classList.add("word-highlight");
-
-    currentEl.scrollIntoView({
-      behavior: "smooth",
-      block: "center"
-    });
-
-    prevWordRef.current = currentEl;
-
-    scrollPdfByProgress();
-  }, [activeWord, scrollPdfByProgress, isPdfReady]);
 
   return (
-    <>
-      {/* ================= PDF VIEW ================= */}
-      <div className="pdf-container">
-        <h2>📄 AI PDF Viewer</h2>
+    <div className="pdf-container">
+      <h2>📄 AI PDF Reader</h2>
 
-        <input
-          type="file"
-          accept=".pdf,.ppt,.pptx,.doc,.docx"
-          onChange={uploadPDF}
-        />
+      <input type="file" accept=".pdf,.docx,.ppt,.pptx" onChange={uploadPDF} />
 
-        {!isPdfReady && pdfUrl && (
-          <p style={{ marginTop: "8px", color: "#555" }}>
-            ⏳ Preparing document…
-          </p>
-        )}
+      <div className="pdf-inner">
+  {pdfUrl ? (
+    pdfUrl.endsWith(".pdf") ? (
+      <iframe
+        ref={pdfFrameRef}
+        src={pdfUrl}
+        title="Document Preview"
+        className="pdf-frame"
+      />
+    ) : (
+      <iframe
+        src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(pdfUrl)}`}
+        title="Office Preview"
+        className="pdf-frame"
+      />
+    )
+  ) : (
+    <div className="pdf-placeholder">
+      Upload a document to preview
+    </div>
+  )}
+</div>
 
-        <div className="pdf-inner">
-          {pdfUrl ? (
-            <iframe
-              ref={pdfFrameRef}
-              src={pdfUrl}
-              title="PDF"
-              className="pdf-frame"
-            />
-          ) : (
-            <div className="pdf-placeholder">
-              Upload a PDF to preview here
-            </div>
-          )}
-        </div>
-      </div>
 
-      {/* ================= EXTRACTED TEXT ================= */}
-      {isPdfReady && extractedText && (
+      {isReady && (
         <div className="pdf-text-outside">
-          {visibleWords.map((word, i) => {
-            const actualIndex = start + i;
-            return (
-              <span
-                key={actualIndex}
-                ref={el => (wordRefs.current[actualIndex] = el)}
-              >
-                {word}&nbsp;
-              </span>
-            );
-          })}
+          {words.map((word, i) => (
+            <span
+              key={i}
+              ref={(el) => (wordRefs.current[i] = el)}
+            >
+              {word}{" "}
+            </span>
+          ))}
         </div>
       )}
-    </>
+    </div>
   );
 }
 
