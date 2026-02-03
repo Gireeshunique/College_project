@@ -28,27 +28,30 @@ This project is designed to act as a virtual teacher, helping students learn by 
 
 🗄 MySQL database for storing document text
 
-### 🏗 Project Architecture
-project-root/
+🏗️ System Architecture
+#### 🔹 Frontend (React)
+###### Frontend (React)
 │
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── PDFViewer.jsx
-│   │   │   └── AIVoiceAssistant.jsx
-│   │   ├── App.jsx
-│   │   └── styles/
-│
-├── backend/
-│   ├── app.py
-│   ├── upload_api.py
-│   ├── pdf_extractor.py
-│   ├── converter.py
-│   ├── ai_engine.py
-│   └── database/
-│       └── mysql.py
-│
-└── README.md
+├── PDFViewer
+ │   ├── Upload file
+ │   ├── Render PDF
+ │   └── Extract text → App state
+ │
+ ├── AIVoiceAssistant
+ │   └── Reads PDF text using AI voice
+ │
+ └── App.jsx (Shared State)
+     └── pdfText
+
+##### 🔹 Backend (Flask)
+##### Backend (Flask)
+ │
+ ├── Upload API
+ ├── File Converter (DOCX / PPTX → PDF)
+ ├── PDF Text Extractor
+ ├── Database Layer (MySQL)
+ └── AI Engine
+
 
 
 ### 🧑‍💻 Tech Stack
